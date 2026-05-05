@@ -18,7 +18,6 @@ public class TaskService {
         this.taskRepository = taskRepository;
     }
 
-    // CREATE
     public TaskResponse createTask(TaskRequest request) {
 
         Task task = new Task();
@@ -31,7 +30,6 @@ public class TaskService {
         return mapToResponse(saved);
     }
 
-    // READ ALL
     public List<TaskResponse> getAllTasks() {
         return taskRepository.findAll()
             .stream()
@@ -39,7 +37,24 @@ public class TaskService {
             .collect(Collectors.toList());
     }
 
-    // helper
+    public TaskResponse updateTask(Long id, TaskRequest request) {
+        Task task = taskRepository.findById(id).orElseThrow(() -> new RuntimeException("Task not found"));
+        task.setTitle(request.getTitle());
+        task.setDescription(request.getDescription());
+        task.setCompleted(request.isCompleted());
+        return mapToResponse(taskRepository.save(task));
+    }
+
+    public void deleteTask(Long id) {
+        taskRepository.deleteById(id);
+    }
+
+    public TaskResponse toggleTask(Long id) {
+        Task task = taskRepository.findById(id).orElseThrow(() -> new RuntimeException("Task not found"));
+        task.setCompleted(!task.isCompleted());
+        return mapToResponse(taskRepository.save(task));
+    }
+
     private TaskResponse mapToResponse(Task task) {
         return new TaskResponse(
             task.getId(),
