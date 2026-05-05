@@ -4,6 +4,7 @@ import taskmanager.dto.TaskRequest;
 import taskmanager.dto.TaskResponse;
 import taskmanager.model.Task;
 import taskmanager.repository.TaskRepository;
+import taskmanager.mapper.TaskMapper;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -13,36 +14,35 @@ import java.util.stream.Collectors;
 public class TaskService {
 
     private final TaskRepository taskRepository;
+    private final TaskMapper taskMapper;
 
-    public TaskService(TaskRepository taskRepository) {
+    public TaskService(TaskRepository taskRepository, TaskMapper taskMapper) {
         this.taskRepository = taskRepository;
+        this.taskMapper = taskMapper;
     }
 
     public TaskResponse createTask(TaskRequest request) {
-
-        Task task = new Task();
-        task.setTitle(request.getTitle());
-        task.setDescription(request.getDescription());
-        task.setCompleted(request.isCompleted());
-
+        Task task = taskMapper.toEntity(request);
         Task saved = taskRepository.save(task);
-
-        return mapToResponse(saved);
+        return taskMapper.toResponse(saved);
     }
 
     public List<TaskResponse> getAllTasks() {
         return taskRepository.findAll()
             .stream()
-            .map(this::mapToResponse)
+            .map(taskMapper::toResponse)
             .collect(Collectors.toList());
     }
 
     public TaskResponse updateTask(Long id, TaskRequest request) {
-        Task task = taskRepository.findById(id).orElseThrow(() -> new RuntimeException("Task not found"));
+        Task task = taskRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Task not found"));
+
         task.setTitle(request.getTitle());
         task.setDescription(request.getDescription());
         task.setCompleted(request.isCompleted());
-        return mapToResponse(taskRepository.save(task));
+
+        return taskMapper.toResponse(taskRepository.save(task));
     }
 
     public void deleteTask(Long id) {
@@ -50,17 +50,11 @@ public class TaskService {
     }
 
     public TaskResponse toggleTask(Long id) {
-        Task task = taskRepository.findById(id).orElseThrow(() -> new RuntimeException("Task not found"));
-        task.setCompleted(!task.isCompleted());
-        return mapToResponse(taskRepository.save(task));
-    }
+        Task task = taskRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Task not found"));
 
-    private TaskResponse mapToResponse(Task task) {
-        return new TaskResponse(
-            task.getId(),
-            task.getTitle(),
-            task.getDescription(),
-            task.isCompleted()
-        );
+        task.setCompleted(!task.isCompleted());
+
+        return taskMapper.toResponse(taskRepository.save(task));
     }
 }

@@ -2,6 +2,9 @@ package taskmanager.model;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
+
+import java.time.Instant;
 
 @Entity
 @Table(name = "tasks")
@@ -16,5 +19,9 @@ public class Task {
 
     private String title;
     private String description;
-    private boolean completed;
+    private boolean completed = false;
+
+    @CreationTimestamp
+    @Column(updatable = false)
+    private Instant createdAt;
 }
