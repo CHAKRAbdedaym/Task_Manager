@@ -1,0 +1,267 @@
+.page {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 22px 16px 40px;
+}
+
+.page-header {
+  margin: 8px 0 18px;
+}
+
+.page-header h1 {
+  margin: 0;
+  font-size: 30px;
+  letter-spacing: -0.02em;
+}
+
+.subtitle {
+  margin: 6px 0 0;
+  color: rgba(15, 23, 42, 0.65);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 0.95fr 1.5fr;
+  gap: 16px;
+  align-items: start;
+}
+
+.card {
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow:
+    0 1px 2px rgba(15, 23, 42, 0.05),
+    0 8px 30px rgba(15, 23, 42, 0.07);
+  padding: 16px;
+  border: 1px solid rgba(15, 23, 42, 0.06);
+}
+
+.add-card h2,
+.list-card h2 {
+  margin: 0 0 12px;
+  font-size: 16px;
+  color: rgba(15, 23, 42, 0.85);
+}
+
+.form {
+  display: grid;
+  gap: 10px;
+}
+
+label {
+  font-size: 13px;
+  color: rgba(15, 23, 42, 0.7);
+}
+
+input,
+textarea {
+  width: 100%;
+  border-radius: 12px;
+  border: 1px solid rgba(15, 23, 42, 0.12);
+  padding: 10px 12px;
+  font-size: 14px;
+  outline: none;
+  background: #fbfbfd;
+}
+
+textarea {
+  resize: vertical;
+}
+
+input:focus,
+textarea:focus {
+  border-color: rgba(37, 99, 235, 0.45);
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
+}
+
+.field-error {
+  font-size: 12px;
+  color: #b91c1c;
+}
+
+.form-actions {
+  margin-top: 6px;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.primary {
+  border: 0;
+  border-radius: 12px;
+  padding: 10px 14px;
+  font-weight: 650;
+  font-size: 14px;
+  color: #fff;
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  cursor: pointer;
+}
+
+.primary:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.ghost {
+  border: 1px solid rgba(15, 23, 42, 0.14);
+  background: #ffffff;
+  color: rgba(15, 23, 42, 0.85);
+  border-radius: 12px;
+  padding: 9px 12px;
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.danger-ghost {
+  border: 1px solid rgba(185, 28, 28, 0.25);
+  background: #fff;
+  color: #b91c1c;
+  border-radius: 12px;
+  padding: 9px 12px;
+  font-weight: 650;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.ghost:disabled,
+.danger-ghost:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.list-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  gap: 10px;
+}
+
+.status {
+  font-size: 12px;
+  color: rgba(15, 23, 42, 0.65);
+  background: rgba(37, 99, 235, 0.09);
+  border: 1px solid rgba(37, 99, 235, 0.18);
+  padding: 6px 10px;
+  border-radius: 999px;
+}
+
+.alert {
+  border-radius: 14px;
+  padding: 10px 12px;
+  margin-bottom: 12px;
+  font-size: 13px;
+  border: 1px solid rgba(185, 28, 28, 0.15);
+  background: rgba(185, 28, 28, 0.07);
+  color: #991b1b;
+}
+
+.alert-error {
+}
+
+.empty {
+  padding: 24px 10px;
+  text-align: center;
+  border: 1px dashed rgba(15, 23, 42, 0.18);
+  border-radius: 16px;
+  color: rgba(15, 23, 42, 0.7);
+}
+
+.empty-title {
+  font-weight: 750;
+  color: rgba(15, 23, 42, 0.85);
+}
+
+.columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.column h3 {
+  margin: 0 0 10px;
+  font-size: 13px;
+  color: rgba(15, 23, 42, 0.6);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.task-list-empty {
+  color: rgba(15, 23, 42, 0.55);
+  font-size: 13px;
+  padding: 12px 6px;
+}
+
+.task-card {
+  border-radius: 16px;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  background: linear-gradient(180deg, #ffffff, #fcfcff);
+  padding: 12px;
+  display: grid;
+  gap: 12px;
+  margin-bottom: 10px;
+  transition: transform 120ms ease, box-shadow 120ms ease, border-color 120ms ease;
+}
+
+.task-card:hover {
+  transform: translateY(-1px);
+  border-color: rgba(37, 99, 235, 0.22);
+  box-shadow: 0 12px 30px rgba(37, 99, 235, 0.10);
+}
+
+.task-card.done {
+  background: linear-gradient(180deg, #ffffff, #f8fafc);
+}
+
+.task-body {
+  display: grid;
+  gap: 6px;
+}
+
+.task-title {
+  font-weight: 800;
+  font-size: 14px;
+}
+
+.task-desc {
+  color: rgba(15, 23, 42, 0.68);
+  font-size: 13px;
+  line-height: 1.35;
+}
+
+.task-desc.done-desc {
+  text-decoration: line-through;
+  text-decoration-thickness: 1px;
+}
+
+.task-meta {
+  color: rgba(15, 23, 42, 0.45);
+  font-size: 12px;
+}
+
+.task-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.task-edit-form .task-actions {
+  justify-content: flex-end;
+}
+
+.task-edit-form input,
+.task-edit-form textarea {
+  background: #ffffff;
+}
+
+@media (max-width: 950px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+
+  .columns {
+    grid-template-columns: 1fr;
+  }
+}
+

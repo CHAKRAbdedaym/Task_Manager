@@ -1,0 +1,235 @@
+<div class="page">
+  <div class="page-header">
+    <div>
+      <h1>Task Manager</h1>
+      <p class="subtitle">Simple, fast task tracking for real work.</p>
+    </div>
+  </div>
+
+  <div class="grid">
+    <section class="card add-card">
+      <h2>Add task</h2>
+
+      <form class="form" [formGroup]="addForm" (ngSubmit)="onAdd()">
+        <label for="add-title">Title</label>
+        <input
+          id="add-title"
+          type="text"
+          formControlName="title"
+          placeholder="e.g., Write project proposal"
+        />
+        <div
+          class="field-error"
+          *ngIf="addForm.controls.title.touched && addForm.controls.title.invalid"
+        >
+          Title is required.
+        </div>
+
+        <label for="add-desc">Description</label>
+        <textarea
+          id="add-desc"
+          rows="4"
+          formControlName="description"
+          placeholder="What needs to be done?"
+        ></textarea>
+        <div
+          class="field-error"
+          *ngIf="addForm.controls.description.touched && addForm.controls.description.invalid"
+        >
+          Description is required.
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="primary" [disabled]="loading$ | async">
+            Add
+          </button>
+        </div>
+      </form>
+    </section>
+
+    <section class="card list-card">
+      <div class="list-header">
+        <h2>Tasks</h2>
+        <div class="status" *ngIf="loading$ | async">Working…</div>
+      </div>
+
+      <div class="alert alert-error" *ngIf="error$ | async as error">
+        {{ error }}
+      </div>
+
+      <div class="empty" *ngIf="(hasTasks$ | async) === false">
+        <div class="empty-title">No tasks yet</div>
+        <div class="empty-sub">Add a task to see it here.</div>
+      </div>
+
+      <div class="columns" *ngIf="hasTasks$ | async">
+        <div class="column">
+          <h3>Active</h3>
+          <ng-container *ngIf="activeTasks$ | async as activeTasks">
+            <div class="task-list-empty" *ngIf="activeTasks.length === 0">
+              All clear.
+            </div>
+
+            <div
+              *ngFor="let task of activeTasks; trackBy: trackById"
+              class="task-card"
+            >
+              <ng-container *ngIf="editingId !== task.id; else editMode">
+                <div class="task-body">
+                  <div class="task-title">{{ task.title }}</div>
+                  <div class="task-desc">{{ task.description }}</div>
+                  <div class="task-meta" *ngIf="task.createdAt">
+                    Created: {{ formatCreatedAt(task.createdAt) }}
+                  </div>
+                </div>
+
+                <div class="task-actions">
+                  <button
+                    type="button"
+                    class="ghost"
+                    [disabled]="loading$ | async"
+                    (click)="toggle(task)"
+                  >
+                    Mark done
+                  </button>
+                  <button
+                    type="button"
+                    class="ghost"
+                    [disabled]="loading$ | async"
+                    (click)="startEdit(task)"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    type="button"
+                    class="danger-ghost"
+                    [disabled]="loading$ | async"
+                    (click)="delete(task)"
+                  >
+                    Delete
+                  </button>
+                </div>
+              </ng-container>
+
+              <ng-template #editMode>
+                <form [formGroup]="editForm" (ngSubmit)="saveEdit(task)" class="task-edit-form">
+                  <div class="task-body">
+                    <input
+                      type="text"
+                      formControlName="title"
+                      placeholder="Task title"
+                    />
+                    <textarea
+                      rows="3"
+                      formControlName="description"
+                      placeholder="Task description"
+                    ></textarea>
+                  </div>
+
+                  <div class="task-actions">
+                    <button type="submit" class="primary" [disabled]="editForm.invalid || (loading$ | async)">
+                      Save
+                    </button>
+                    <button
+                      type="button"
+                      class="ghost"
+                      [disabled]="loading$ | async"
+                      (click)="cancelEdit()"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </form>
+              </ng-template>
+            </div>
+          </ng-container>
+        </div>
+
+        <div class="column">
+          <h3>Completed</h3>
+          <ng-container *ngIf="completedTasks$ | async as doneTasks">
+            <div class="task-list-empty" *ngIf="doneTasks.length === 0">
+              Nothing completed yet.
+            </div>
+
+            <div
+              *ngFor="let task of doneTasks; trackBy: trackById"
+              class="task-card done"
+            >
+              <ng-container *ngIf="editingId !== task.id; else editModeDone">
+                <div class="task-body">
+                  <div class="task-title done-title">
+                    {{ task.title }}
+                  </div>
+                  <div class="task-desc done-desc">{{ task.description }}</div>
+                  <div class="task-meta" *ngIf="task.createdAt">
+                    Created: {{ formatCreatedAt(task.createdAt) }}
+                  </div>
+                </div>
+
+                <div class="task-actions">
+                  <button
+                    type="button"
+                    class="ghost"
+                    [disabled]="loading$ | async"
+                    (click)="toggle(task)"
+                  >
+                    Reopen
+                  </button>
+                  <button
+                    type="button"
+                    class="ghost"
+                    [disabled]="loading$ | async"
+                    (click)="startEdit(task)"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    type="button"
+                    class="danger-ghost"
+                    [disabled]="loading$ | async"
+                    (click)="delete(task)"
+                  >
+                    Delete
+                  </button>
+                </div>
+              </ng-container>
+
+              <ng-template #editModeDone>
+                <form [formGroup]="editForm" (ngSubmit)="saveEdit(task)" class="task-edit-form">
+                  <div class="task-body">
+                    <input
+                      type="text"
+                      formControlName="title"
+                      placeholder="Task title"
+                    />
+                    <textarea
+                      rows="3"
+                      formControlName="description"
+                      placeholder="Task description"
+                    ></textarea>
+                  </div>
+
+                  <div class="task-actions">
+                    <button type="submit" class="primary" [disabled]="editForm.invalid || (loading$ | async)">
+                      Save
+                    </button>
+                    <button
+                      type="button"
+                      class="ghost"
+                      [disabled]="loading$ | async"
+                      (click)="cancelEdit()"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </form>
+              </ng-template>
+            </div>
+          </ng-container>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+
