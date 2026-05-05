@@ -5,6 +5,7 @@ import taskmanager.dto.TaskResponse;
 import taskmanager.service.TaskService;
 import org.springframework.web.bind.annotation.*;
 
+import jakarta.validation.Valid;
 import java.util.List;
 
 @RestController
@@ -19,7 +20,7 @@ public class TaskController {
 
     // POST
     @PostMapping
-    public TaskResponse create(@RequestBody TaskRequest request) {
+    public TaskResponse create(@Valid @RequestBody TaskRequest request) {
         return taskService.createTask(request);
     }
 
