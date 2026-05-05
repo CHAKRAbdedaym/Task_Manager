@@ -1,0 +1,48 @@
+:host {
+  display: block;
+  min-height: 100vh;
+  background:
+    radial-gradient(900px circle at 10% -10%, rgba(37, 99, 235, 0.25), transparent 45%),
+    radial-gradient(900px circle at 90% 0%, rgba(29, 78, 216, 0.18), transparent 48%),
+    #f6f7fb;
+  color: rgba(15, 23, 42, 0.92);
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji",
+    "Segoe UI Emoji";
+}
+
+.app-shell {
+  min-height: 100vh;
+}
+
+.app-header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: rgba(246, 247, 251, 0.75);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(15, 23, 42, 0.06);
+}
+
+.brand {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.brand-title {
+  font-weight: 900;
+  letter-spacing: -0.02em;
+}
+
+.brand-sub {
+  color: rgba(15, 23, 42, 0.62);
+  font-size: 13px;
+}
+
+.app-main {
+  padding: 0;
+}

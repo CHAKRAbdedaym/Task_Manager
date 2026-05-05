@@ -18,15 +18,28 @@ public class TaskController {
         this.taskService = taskService;
     }
 
-    // POST
     @PostMapping
     public TaskResponse create(@Valid @RequestBody TaskRequest request) {
         return taskService.createTask(request);
     }
 
-    // GET
     @GetMapping
     public List<TaskResponse> getAll() {
         return taskService.getAllTasks();
+    }
+
+    @PutMapping("/{id}")
+    public TaskResponse update(@PathVariable Long id, @RequestBody TaskRequest request) {
+        return taskService.updateTask(id, request);
+    }
+
+    @DeleteMapping("/{id}")
+    public void delete(@PathVariable Long id) {
+        taskService.deleteTask(id);
+    }
+
+    @PatchMapping("/{id}/toggle")
+    public TaskResponse toggle(@PathVariable Long id) {
+        return taskService.toggleTask(id);
     }
 }
