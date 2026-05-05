@@ -1,5 +1,8 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, delay, finalize, of, tap, throwError } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
+import { BehaviorSubject, Observable, catchError, finalize, throwError } from 'rxjs';
+import { tap } from 'rxjs';
+
 import { CreateTaskPayload, Task, UpdateTaskPayload } from '../models/task';
 
 export type { Task } from '../models/task';
@@ -8,11 +11,7 @@ export type { Task } from '../models/task';
   providedIn: 'root'
 })
 export class TaskService {
-  // Task UI branch uses an in-memory store so the UI can be developed standalone.
-  // The integration branch will swap these methods to real HTTP calls.
-  private readonly simulatedLatencyMs = 350;
-
-  private nextId = 1;
+  private readonly apiUrl = 'http://localhost:8080/api/tasks';
 
   private readonly tasksSubject = new BehaviorSubject<Task[]>([]);
   private readonly loadingSubject = new BehaviorSubject<boolean>(false);
@@ -22,26 +21,37 @@ export class TaskService {
   readonly loading$: Observable<boolean> = this.loadingSubject.asObservable();
   readonly error$: Observable<string | null> = this.errorSubject.asObservable();
 
+  constructor(private readonly http: HttpClient) {}
+
   getTasks(): Observable<Task[]> {
     return this.tasks$;
+  }
+
+  loadTasks(): Observable<Task[]> {
+    this.errorSubject.next(null);
+    this.loadingSubject.next(true);
+
+    return this.http.get<Task[]>(this.apiUrl).pipe(
+      tap((tasks) => this.tasksSubject.next(tasks)),
+      finalize(() => this.loadingSubject.next(false)),
+      catchError((err) => {
+        this.errorSubject.next(this.extractErrorMessage(err));
+        return throwError(() => err);
+      })
+    );
   }
 
   createTask(payload: CreateTaskPayload): Observable<Task> {
     this.errorSubject.next(null);
     this.loadingSubject.next(true);
 
-    const task: Task = {
-      id: this.nextId++,
-      title: payload.title,
-      description: payload.description,
-      completed: false,
-      createdAt: new Date().toISOString()
-    };
-
-    return of(task).pipe(
-      delay(this.simulatedLatencyMs),
-      tap((t) => this.tasksSubject.next([...this.tasksSubject.value, t])),
-      finalize(() => this.loadingSubject.next(false))
+    return this.http.post<Task>(this.apiUrl, payload).pipe(
+      tap((task) => this.upsert(task)),
+      finalize(() => this.loadingSubject.next(false)),
+      catchError((err) => {
+        this.errorSubject.next(this.extractErrorMessage(err));
+        return throwError(() => err);
+      })
     );
   }
 
@@ -49,30 +59,13 @@ export class TaskService {
     this.errorSubject.next(null);
     this.loadingSubject.next(true);
 
-    const current = this.tasksSubject.value;
-    const existing = current.find((t) => t.id === id);
-
-    if (!existing) {
-      this.errorSubject.next(`Task not found: ${id}`);
-      return throwError(() => new Error(`Task not found: ${id}`)).pipe(
-        finalize(() => this.loadingSubject.next(false))
-      );
-    }
-
-    const updated: Task = {
-      ...existing,
-      title: payload.title,
-      description: payload.description,
-      completed: payload.completed ?? existing.completed
-    };
-
-    return of(updated).pipe(
-      delay(this.simulatedLatencyMs),
-      tap(() => {
-        const now = this.tasksSubject.value;
-        this.tasksSubject.next(now.map((t) => (t.id === id ? updated : t)));
-      }),
-      finalize(() => this.loadingSubject.next(false))
+    return this.http.put<Task>(`${this.apiUrl}/${id}`, payload).pipe(
+      tap((task) => this.upsert(task)),
+      finalize(() => this.loadingSubject.next(false)),
+      catchError((err) => {
+        this.errorSubject.next(this.extractErrorMessage(err));
+        return throwError(() => err);
+      })
     );
   }
 
@@ -80,20 +73,13 @@ export class TaskService {
     this.errorSubject.next(null);
     this.loadingSubject.next(true);
 
-    const current = this.tasksSubject.value;
-    const exists = current.some((t) => t.id === id);
-
-    if (!exists) {
-      this.errorSubject.next(`Task not found: ${id}`);
-      return throwError(() => new Error(`Task not found: ${id}`)).pipe(
-        finalize(() => this.loadingSubject.next(false))
-      );
-    }
-
-    return of(undefined).pipe(
-      delay(this.simulatedLatencyMs),
-      tap(() => this.removeFromStore(id)),
-      finalize(() => this.loadingSubject.next(false))
+    return this.http.delete<void>(`${this.apiUrl}/${id}`).pipe(
+      tap(() => this.tasksSubject.next(this.tasksSubject.value.filter((t) => t.id !== id))),
+      finalize(() => this.loadingSubject.next(false)),
+      catchError((err) => {
+        this.errorSubject.next(this.extractErrorMessage(err));
+        return throwError(() => err);
+      })
     );
   }
 
@@ -101,26 +87,31 @@ export class TaskService {
     this.errorSubject.next(null);
     this.loadingSubject.next(true);
 
-    const current = this.tasksSubject.value;
-    const existing = current.find((t) => t.id === id);
-
-    if (!existing) {
-      this.errorSubject.next(`Task not found: ${id}`);
-      return throwError(() => new Error(`Task not found: ${id}`)).pipe(
-        finalize(() => this.loadingSubject.next(false))
-      );
-    }
-
-    const updated: Task = { ...existing, completed: !existing.completed };
-
-    return of(updated).pipe(
-      delay(this.simulatedLatencyMs),
-      tap(() => this.tasksSubject.next(this.tasksSubject.value.map((t) => (t.id === id ? updated : t)))),
-      finalize(() => this.loadingSubject.next(false))
+    // Backend ignores request body for this endpoint; `{}` keeps Angular happy.
+    return this.http.patch<Task>(`${this.apiUrl}/${id}/toggle`, {}).pipe(
+      tap((task) => this.upsert(task)),
+      finalize(() => this.loadingSubject.next(false)),
+      catchError((err) => {
+        this.errorSubject.next(this.extractErrorMessage(err));
+        return throwError(() => err);
+      })
     );
   }
 
-  private removeFromStore(taskId: number): void {
-    this.tasksSubject.next(this.tasksSubject.value.filter((t) => t.id !== taskId));
+  private upsert(task: Task): void {
+    const current = this.tasksSubject.value;
+    const exists = current.some((t) => t.id === task.id);
+    this.tasksSubject.next(
+      exists ? current.map((t) => (t.id === task.id ? task : t)) : [...current, task]
+    );
+  }
+
+  private extractErrorMessage(err: unknown): string {
+    const anyErr = err as any;
+    const message =
+      anyErr?.error?.message ??
+      anyErr?.message ??
+      'Request failed';
+    return typeof message === 'string' ? message : 'Request failed';
   }
 }

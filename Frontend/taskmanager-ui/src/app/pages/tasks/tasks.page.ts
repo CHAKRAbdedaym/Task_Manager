@@ -1,5 +1,5 @@
 import { AsyncPipe, CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { map } from 'rxjs/operators';
 import { Observable } from 'rxjs';
@@ -15,7 +15,7 @@ import { trackById } from '../../core/track-by';
   templateUrl: './tasks.page.html',
   styleUrl: './tasks.page.css'
 })
-export class TasksPage {
+export class TasksPage implements OnInit {
   readonly tasks$: Observable<Task[]> = this.taskService.tasks$;
   readonly loading$ = this.taskService.loading$;
   readonly error$ = this.taskService.error$;
@@ -50,6 +50,14 @@ export class TasksPage {
     private readonly fb: FormBuilder,
     private readonly taskService: TaskService
   ) {}
+
+  ngOnInit(): void {
+    this.taskService.loadTasks().subscribe({
+      error: () => {
+        // error is exposed via the service; no-op here
+      }
+    });
+  }
 
   formatCreatedAt(iso?: string): string {
     if (!iso) return '';
