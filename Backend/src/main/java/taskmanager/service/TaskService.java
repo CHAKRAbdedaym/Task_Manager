@@ -1,5 +1,6 @@
 package taskmanager.service;
 
+import taskmanager.exception.TaskNotFoundException;
 import taskmanager.dto.TaskRequest;
 import taskmanager.dto.TaskResponse;
 import taskmanager.model.Task;
@@ -34,5 +35,39 @@ public class TaskService {
             .stream()
             .map(taskMapper::toResponse)
             .collect(Collectors.toList());
+    }
+
+    // READ ONE
+    public TaskResponse getTaskById(Long id) {
+        Task task = taskRepository.findById(id)
+            .orElseThrow(() -> new TaskNotFoundException(id));
+        return taskMapper.toResponse(task);
+    }
+
+    // UPDATE
+    public TaskResponse updateTask(Long id, TaskRequest request) {
+        Task task = taskRepository.findById(id)
+            .orElseThrow(() -> new TaskNotFoundException(id));
+
+        taskMapper.applyRequest(task, request);
+        Task saved = taskRepository.save(task);
+        return taskMapper.toResponse(saved);
+    }
+
+    // DELETE
+    public void deleteTask(Long id) {
+        Task task = taskRepository.findById(id)
+            .orElseThrow(() -> new TaskNotFoundException(id));
+        taskRepository.delete(task);
+    }
+
+    // TOGGLE COMPLETED
+    public TaskResponse toggleTask(Long id) {
+        Task task = taskRepository.findById(id)
+            .orElseThrow(() -> new TaskNotFoundException(id));
+
+        task.setCompleted(!task.isCompleted());
+        Task saved = taskRepository.save(task);
+        return taskMapper.toResponse(saved);
     }
 }
