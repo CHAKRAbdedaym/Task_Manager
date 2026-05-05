@@ -40,7 +40,9 @@ public class TaskService {
 
         task.setTitle(request.getTitle());
         task.setDescription(request.getDescription());
-        task.setCompleted(request.isCompleted());
+        if (request.getCompleted() != null) {
+            task.setCompleted(request.getCompleted());
+        }
 
         return taskMapper.toResponse(taskRepository.save(task));
     }
