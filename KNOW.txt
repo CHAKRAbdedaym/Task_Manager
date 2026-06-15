@@ -1,0 +1,42 @@
+# Task Manager Project - Context & Architecture
+
+## Overview
+This is a Full-Stack Task Manager application allowing users to view, create, edit, delete, and toggle the completion state of their tasks. Currently, the application is fully functional locally across both the backend and frontend. The next stage of the project is to implement robust DevOps practices including Docker containerization, Kubernetes orchestration, and a Jenkins CI/CD pipeline.
+
+## Technology Stack
+- **Backend:** Java 21, Spring Boot 3.5.x
+  - Dependencies: Spring Web, Spring Data JPA, PostgreSQL Driver, Lombok, Spring Boot Validation.
+  - Build Tool: Maven (`pom.xml`)
+- **Frontend:** Angular (Standalone Components)
+  - Tooling: npm, Angular CLI
+- **Database:** PostgreSQL
+
+## Project Structure
+- **/Backend** - Spring Boot Application
+  - `config/CorsConfig.java`: Configures CORS to allow cross-origin requests from `http://localhost:4200` (Methods: GET, POST, PUT, DELETE, PATCH, OPTIONS).
+  - `controller/TaskController.java`: REST Controller exposing API endpoints.
+  - `service/TaskService.java`: Business logic handling operations via a `TaskMapper` linking DTOs to Entities.
+  - `model/Task.java`: JPA Entity mapping to the `tasks` table (`id`, `title`, `description`, `completed`).
+  - `dto/TaskRequest.java` & `TaskResponse.java`: DTOs restricting input/output structures (e.g. `completed` is a `Boolean` wrapper to safely handle patching).
+  - `repository/TaskRepository.java`: Standard JPA interface.
+  
+- **/Frontend/taskmanager-ui** - Angular Application
+  - `tasks/tasks.component.ts`: Primary visual task manager UI.
+  - `services/task.service.ts`: Handles observable API calls to `http://localhost:8080/api/tasks`.
+  - (Note: The repository currently has a `.worktrees/backend` nested folder setup created recently.)
+
+## API Endpoints
+Base URL: `http://localhost:8080/api/tasks`
+- `GET /`: Retrieve all tasks
+- `POST /`: Create a new task
+- `PUT /{id}`: Update an existing task
+- `DELETE /{id}`: Delete a task
+- `PATCH /{id}/toggle`: Toggle task completion state
+
+## Current State & Next Objectives
+The application has recently had its editing, deletion, and toggle logic fully implemented on the backend to match the frontend contracts. It compiles cleanly and runs effectively.
+
+The AI assistant should now guide the user through:
+1. **Dockerization:** Writing `Dockerfile`s for the Spring Boot application and a multi-stage Nginx `Dockerfile` for the Angular application, along with a `docker-compose.yml` to orchestrate both alongside a PostgreSQL container.
+2. **Kubernetes:** Creating Deployment, Service, ConfigMap, and Ingress YAML manifests.
+3. **Jenkins:** Constructing a robust, declarative `Jenkinsfile` pipeline to handle automated building, image pushing, and deployment.

@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: taskmanager-config
+data:
+  db-host: taskmanager-db-service
+  db-port: "5432"
+  db-name: taskmanager
+  spring-ddl-auto: update
+  spring-datasource-url: jdbc:postgresql://taskmanager-db-service:5432/taskmanager

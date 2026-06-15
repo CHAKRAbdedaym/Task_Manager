@@ -1,0 +1,76 @@
+version: '3.8'
+
+services:
+
+  # ──────────────────────────────
+  # PostgreSQL Database
+  # ──────────────────────────────
+  taskmanager-db:
+    image: postgres:16-alpine
+    container_name: taskmanager-db
+    environment:
+      POSTGRES_DB: taskmanager
+      POSTGRES_USER: taskuser
+      POSTGRES_PASSWORD: taskpassword
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - taskmanager-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U taskuser -d taskmanager"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ──────────────────────────────
+  # Spring Boot Backend
+  # ──────────────────────────────
+  taskmanager-backend:
+    build:
+      context: ./Backend
+      dockerfile: Dockerfile
+    container_name: taskmanager-backend
+    image: taskmanager-backend       # ← add this line
+
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://taskmanager-db:5432/taskmanager
+      SPRING_DATASOURCE_USERNAME: taskuser
+      SPRING_DATASOURCE_PASSWORD: taskpassword
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+    ports:
+      - "8080:8080"
+    networks:
+      - taskmanager-network
+    depends_on:
+      taskmanager-db:
+        condition: service_healthy
+
+  # ──────────────────────────────
+  # Angular Frontend
+  # ──────────────────────────────
+  taskmanager-frontend:
+    build:
+      context: ./Frontend/taskmanager-ui
+      dockerfile: Dockerfile
+    container_name: taskmanager-frontend
+    image: taskmanager-frontend       # ← add this line
+
+    ports:
+      - "80:80"
+    networks:
+      - taskmanager-network
+    depends_on:
+      - taskmanager-backend
+
+# ──────────────────────────────
+# Shared Network
+# ──────────────────────────────
+networks:
+  taskmanager-network:
+    driver: bridge
+
+# ──────────────────────────────
+# Persistent Volume for DB data
+# ──────────────────────────────
+volumes:
+  postgres_data:

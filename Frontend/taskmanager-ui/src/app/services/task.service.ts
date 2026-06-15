@@ -11,7 +11,7 @@ export type { Task } from '../models/task';
   providedIn: 'root'
 })
 export class TaskService {
-  private readonly apiUrl = 'http://localhost:8080/api/tasks';
+  private readonly apiUrl = '/api/tasks';
 
   private readonly tasksSubject = new BehaviorSubject<Task[]>([]);
   private readonly loadingSubject = new BehaviorSubject<boolean>(false);
