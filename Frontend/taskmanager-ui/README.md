@@ -1,27 +1,36 @@
-# TaskmanagerUi
+# TaskMaster Frontend
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 18.0.3.
+A premium Angular 19 standalone application with a modern Glassmorphism design system.
 
-## Development server
+## 🎨 Design Philosophy
+- **Glassmorphism**: Translucent cards with backdrop blur.
+- **Responsive**: Fluid layouts for mobile, tablet, and desktop.
+- **User-Centric**: Skeleton loaders, toast notifications, and empty states.
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The application will automatically reload if you change any of the source files.
+## 🛠️ Development
+### Setup
+```bash
+npm install
+```
 
-## Code scaffolding
+### Run (Local Dev)
+```bash
+npm start
+```
+By default, the Angular dev server expects the backend on port 8080.
 
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
+## 🚀 Production Deployment
+The application is containerized using **Nginx**.
+- **Stage 1**: Angular build (Build Optimizer enabled).
+- **Stage 2**: Nginx server configuration (SPA routing fallback enabled).
 
-## Build
+## 🔒 Security Integration
+- **Auth Service**: Manages user state and JWT storage.
+- **Auth Interceptor**: Automatically attaches JWT to all API requests.
+- **Auth Guard**: Protects `/tasks` route from unauthenticated access.
 
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory.
-
-## Running unit tests
-
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
-
-## Running end-to-end tests
-
-Run `ng e2e` to execute the end-to-end tests via a platform of your choice. To use this command, you need to first add a package that implements end-to-end testing capabilities.
-
-## Further help
-
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+## 📁 Key Directories
+- `src/app/core`: Interceptors, guards, and shared services.
+- `src/app/pages`: Main view components (Tasks, Login, Register).
+- `src/app/services`: API interaction layer.
+- `src/styles.css`: Global design system and theme tokens.

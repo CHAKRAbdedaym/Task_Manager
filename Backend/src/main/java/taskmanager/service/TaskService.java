@@ -18,8 +18,6 @@ import taskmanager.repository.TaskSpecification;
 import taskmanager.repository.UserRepository;
 
 import java.time.Instant;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class TaskService {
@@ -65,7 +63,7 @@ public class TaskService {
         
         User user = getCurrentUser();
         
-        Specification<Task> spec = Specification.where(TaskSpecification.hasOwner(user))
+        Specification<Task> spec = TaskSpecification.hasOwner(user)
                 .and(TaskSpecification.hasCompleted(completed))
                 .and(TaskSpecification.hasPriority(priority))
                 .and(TaskSpecification.hasCategory(category))
