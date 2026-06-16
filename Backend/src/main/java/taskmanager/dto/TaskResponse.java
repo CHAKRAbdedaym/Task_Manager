@@ -16,4 +16,7 @@ public class TaskResponse {
     private boolean completed;
 
     private Instant createdAt;
+    private Instant dueDate;
+    private taskmanager.model.Priority priority;
+    private String category;
 }

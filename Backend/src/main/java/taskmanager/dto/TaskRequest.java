@@ -15,4 +15,8 @@ public class TaskRequest {
 
     // Optional to keep POST payload minimal; if null we keep the current/default value.
     private Boolean completed;
+
+    private java.time.Instant dueDate;
+    private taskmanager.model.Priority priority;
+    private String category;
 }

@@ -1,5 +1,8 @@
 package taskmanager.service;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
@@ -7,11 +10,14 @@ import taskmanager.dto.TaskRequest;
 import taskmanager.dto.TaskResponse;
 import taskmanager.exception.TaskNotFoundException;
 import taskmanager.mapper.TaskMapper;
+import taskmanager.model.Priority;
 import taskmanager.model.Task;
 import taskmanager.model.User;
 import taskmanager.repository.TaskRepository;
+import taskmanager.repository.TaskSpecification;
 import taskmanager.repository.UserRepository;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -48,12 +54,26 @@ public class TaskService {
         return taskMapper.toResponse(saved);
     }
 
-    public List<TaskResponse> getAllTasks() {
+    public Page<TaskResponse> getAllTasks(
+            Boolean completed,
+            Priority priority,
+            String category,
+            String search,
+            Instant dueBefore,
+            Instant dueAfter,
+            Pageable pageable) {
+        
         User user = getCurrentUser();
-        return taskRepository.findByOwner(user)
-                .stream()
-                .map(taskMapper::toResponse)
-                .collect(Collectors.toList());
+        
+        Specification<Task> spec = Specification.where(TaskSpecification.hasOwner(user))
+                .and(TaskSpecification.hasCompleted(completed))
+                .and(TaskSpecification.hasPriority(priority))
+                .and(TaskSpecification.hasCategory(category))
+                .and(TaskSpecification.search(search))
+                .and(TaskSpecification.dueBefore(dueBefore))
+                .and(TaskSpecification.dueAfter(dueAfter));
+
+        return taskRepository.findAll(spec, pageable).map(taskMapper::toResponse);
     }
 
     public TaskResponse updateTask(Long id, TaskRequest request) {
@@ -61,12 +81,7 @@ public class TaskService {
         Task task = taskRepository.findByIdAndOwner(id, user)
                 .orElseThrow(() -> new TaskNotFoundException("Task not found with id: " + id));
 
-        task.setTitle(request.getTitle());
-        task.setDescription(request.getDescription());
-        if (request.getCompleted() != null) {
-            task.setCompleted(request.getCompleted());
-        }
-
+        taskMapper.applyRequest(task, request);
         return taskMapper.toResponse(taskRepository.save(task));
     }
 

@@ -18,7 +18,10 @@ public class TaskMapper {
             task.getTitle(),
             task.getDescription(),
             task.isCompleted(),
-            task.getCreatedAt()
+            task.getCreatedAt(),
+            task.getDueDate(),
+            task.getPriority(),
+            task.getCategory()
         );
     }
 
@@ -35,6 +38,9 @@ public class TaskMapper {
 
         task.setTitle(request.getTitle());
         task.setDescription(request.getDescription());
+        task.setDueDate(request.getDueDate());
+        task.setPriority(request.getPriority());
+        task.setCategory(request.getCategory());
 
         // Keep POST minimal: if completed is not provided, we keep current/default.
         if (request.getCompleted() != null) {

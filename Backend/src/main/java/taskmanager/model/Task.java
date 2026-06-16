@@ -20,6 +20,12 @@ public class Task {
     private String title;
     private String description;
     private boolean completed = false;
+    private Instant dueDate;
+
+    @Enumerated(EnumType.STRING)
+    private Priority priority = Priority.MEDIUM;
+
+    private String category;
 
     @CreationTimestamp
     @Column(updatable = false)

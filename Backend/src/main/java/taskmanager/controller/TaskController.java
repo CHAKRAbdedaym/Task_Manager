@@ -1,12 +1,16 @@
 package taskmanager.controller;
 
+import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.web.bind.annotation.*;
 import taskmanager.dto.TaskRequest;
 import taskmanager.dto.TaskResponse;
+import taskmanager.model.Priority;
 import taskmanager.service.TaskService;
-import org.springframework.web.bind.annotation.*;
 
-import jakarta.validation.Valid;
-import java.util.List;
+import java.time.Instant;
 
 @RestController
 @RequestMapping("/api/tasks")
@@ -24,8 +28,15 @@ public class TaskController {
     }
 
     @GetMapping
-    public List<TaskResponse> getAll() {
-        return taskService.getAllTasks();
+    public Page<TaskResponse> getAll(
+            @RequestParam(required = false) Boolean completed,
+            @RequestParam(required = false) Priority priority,
+            @RequestParam(required = false) String category,
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) Instant dueBefore,
+            @RequestParam(required = false) Instant dueAfter,
+            @PageableDefault(size = 10, sort = "createdAt,desc") Pageable pageable) {
+        return taskService.getAllTasks(completed, priority, category, search, dueBefore, dueAfter, pageable);
     }
 
     @PutMapping("/{id}")
