@@ -4,6 +4,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -77,11 +79,12 @@ public class TaskIsolationTest {
         assertThrows(TaskNotFoundException.class, () -> taskService.deleteTask(taskAId));
 
         // Step 3: User B should not see User A's task in their list
-        assertTrue(taskService.getAllTasks().isEmpty());
+        Pageable pageable = PageRequest.of(0, 10);
+        assertTrue(taskService.getAllTasks(null, null, null, null, null, null, pageable).getContent().isEmpty());
 
         // Step 4: User A should still see their task
         authenticateAs("userA@example.com");
-        assertEquals(1, taskService.getAllTasks().size());
-        assertEquals("User A Task", taskService.getAllTasks().get(0).getTitle());
+        assertEquals(1, taskService.getAllTasks(null, null, null, null, null, null, pageable).getTotalElements());
+        assertEquals("User A Task", taskService.getAllTasks(null, null, null, null, null, null, pageable).getContent().get(0).getTitle());
     }
 }
