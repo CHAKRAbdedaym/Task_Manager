@@ -24,4 +24,8 @@ public class Task {
     @CreationTimestamp
     @Column(updatable = false)
     private Instant createdAt;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User owner;
 }

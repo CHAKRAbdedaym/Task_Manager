@@ -1,11 +1,16 @@
 package taskmanager.service;
 
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.stereotype.Service;
 import taskmanager.dto.TaskRequest;
 import taskmanager.dto.TaskResponse;
-import taskmanager.model.Task;
-import taskmanager.repository.TaskRepository;
+import taskmanager.exception.TaskNotFoundException;
 import taskmanager.mapper.TaskMapper;
-import org.springframework.stereotype.Service;
+import taskmanager.model.Task;
+import taskmanager.model.User;
+import taskmanager.repository.TaskRepository;
+import taskmanager.repository.UserRepository;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -14,29 +19,47 @@ import java.util.stream.Collectors;
 public class TaskService {
 
     private final TaskRepository taskRepository;
+    private final UserRepository userRepository;
     private final TaskMapper taskMapper;
 
-    public TaskService(TaskRepository taskRepository, TaskMapper taskMapper) {
+    public TaskService(TaskRepository taskRepository, UserRepository userRepository, TaskMapper taskMapper) {
         this.taskRepository = taskRepository;
+        this.userRepository = userRepository;
         this.taskMapper = taskMapper;
     }
 
+    private User getCurrentUser() {
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        String email;
+        if (principal instanceof UserDetails) {
+            email = ((UserDetails) principal).getUsername();
+        } else {
+            email = principal.toString();
+        }
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Logged in user not found"));
+    }
+
     public TaskResponse createTask(TaskRequest request) {
+        User user = getCurrentUser();
         Task task = taskMapper.toEntity(request);
+        task.setOwner(user);
         Task saved = taskRepository.save(task);
         return taskMapper.toResponse(saved);
     }
 
     public List<TaskResponse> getAllTasks() {
-        return taskRepository.findAll()
-            .stream()
-            .map(taskMapper::toResponse)
-            .collect(Collectors.toList());
+        User user = getCurrentUser();
+        return taskRepository.findByOwner(user)
+                .stream()
+                .map(taskMapper::toResponse)
+                .collect(Collectors.toList());
     }
 
     public TaskResponse updateTask(Long id, TaskRequest request) {
-        Task task = taskRepository.findById(id)
-            .orElseThrow(() -> new RuntimeException("Task not found"));
+        User user = getCurrentUser();
+        Task task = taskRepository.findByIdAndOwner(id, user)
+                .orElseThrow(() -> new TaskNotFoundException("Task not found with id: " + id));
 
         task.setTitle(request.getTitle());
         task.setDescription(request.getDescription());
@@ -48,15 +71,18 @@ public class TaskService {
     }
 
     public void deleteTask(Long id) {
-        taskRepository.deleteById(id);
+        User user = getCurrentUser();
+        Task task = taskRepository.findByIdAndOwner(id, user)
+                .orElseThrow(() -> new TaskNotFoundException("Task not found with id: " + id));
+        taskRepository.delete(task);
     }
 
     public TaskResponse toggleTask(Long id) {
-        Task task = taskRepository.findById(id)
-            .orElseThrow(() -> new RuntimeException("Task not found"));
+        User user = getCurrentUser();
+        Task task = taskRepository.findByIdAndOwner(id, user)
+                .orElseThrow(() -> new TaskNotFoundException("Task not found with id: " + id));
 
         task.setCompleted(!task.isCompleted());
-
         return taskMapper.toResponse(taskRepository.save(task));
     }
 }
