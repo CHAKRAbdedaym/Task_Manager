@@ -1,11 +1,31 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, Observable, catchError, finalize, throwError } from 'rxjs';
-import { tap } from 'rxjs';
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { Observable } from 'rxjs';
 
-import { CreateTaskPayload, Task, UpdateTaskPayload } from '../models/task';
+export enum Priority {
+  LOW = 'LOW',
+  MEDIUM = 'MEDIUM',
+  HIGH = 'HIGH'
+}
 
-export type { Task } from '../models/task';
+export interface Task {
+  id?: number;
+  title: string;
+  description: string;
+  completed: boolean;
+  createdAt?: string;
+  dueDate?: string;
+  priority: Priority;
+  category?: string;
+}
+
+export interface Page<T> {
+  content: T[];
+  totalElements: number;
+  totalPages: number;
+  size: number;
+  number: number;
+}
 
 @Injectable({
   providedIn: 'root'
@@ -13,105 +33,31 @@ export type { Task } from '../models/task';
 export class TaskService {
   private readonly apiUrl = '/api/tasks';
 
-  private readonly tasksSubject = new BehaviorSubject<Task[]>([]);
-  private readonly loadingSubject = new BehaviorSubject<boolean>(false);
-  private readonly errorSubject = new BehaviorSubject<string | null>(null);
+  constructor(private http: HttpClient) {}
 
-  readonly tasks$: Observable<Task[]> = this.tasksSubject.asObservable();
-  readonly loading$: Observable<boolean> = this.loadingSubject.asObservable();
-  readonly error$: Observable<string | null> = this.errorSubject.asObservable();
-
-  constructor(private readonly http: HttpClient) {}
-
-  getTasks(): Observable<Task[]> {
-    return this.tasks$;
+  getTasks(params: any = {}): Observable<Page<Task>> {
+    let httpParams = new HttpParams();
+    Object.keys(params).forEach(key => {
+      if (params[key] !== null && params[key] !== undefined && params[key] !== '') {
+        httpParams = httpParams.set(key, params[key]);
+      }
+    });
+    return this.http.get<Page<Task>>(this.apiUrl, { params: httpParams });
   }
 
-  loadTasks(): Observable<Task[]> {
-    this.errorSubject.next(null);
-    this.loadingSubject.next(true);
-
-    return this.http.get<Task[]>(this.apiUrl).pipe(
-      tap((tasks) => this.tasksSubject.next(tasks)),
-      finalize(() => this.loadingSubject.next(false)),
-      catchError((err) => {
-        this.errorSubject.next(this.extractErrorMessage(err));
-        return throwError(() => err);
-      })
-    );
+  createTask(task: Task): Observable<Task> {
+    return this.http.post<Task>(this.apiUrl, task);
   }
 
-  createTask(payload: CreateTaskPayload): Observable<Task> {
-    this.errorSubject.next(null);
-    this.loadingSubject.next(true);
-
-    return this.http.post<Task>(this.apiUrl, payload).pipe(
-      tap((task) => this.upsert(task)),
-      finalize(() => this.loadingSubject.next(false)),
-      catchError((err) => {
-        this.errorSubject.next(this.extractErrorMessage(err));
-        return throwError(() => err);
-      })
-    );
-  }
-
-  updateTask(id: number, payload: UpdateTaskPayload): Observable<Task> {
-    this.errorSubject.next(null);
-    this.loadingSubject.next(true);
-
-    return this.http.put<Task>(`${this.apiUrl}/${id}`, payload).pipe(
-      tap((task) => this.upsert(task)),
-      finalize(() => this.loadingSubject.next(false)),
-      catchError((err) => {
-        this.errorSubject.next(this.extractErrorMessage(err));
-        return throwError(() => err);
-      })
-    );
+  updateTask(id: number, task: Task): Observable<Task> {
+    return this.http.put<Task>(`${this.apiUrl}/${id}`, task);
   }
 
   deleteTask(id: number): Observable<void> {
-    this.errorSubject.next(null);
-    this.loadingSubject.next(true);
-
-    return this.http.delete<void>(`${this.apiUrl}/${id}`).pipe(
-      tap(() => this.tasksSubject.next(this.tasksSubject.value.filter((t) => t.id !== id))),
-      finalize(() => this.loadingSubject.next(false)),
-      catchError((err) => {
-        this.errorSubject.next(this.extractErrorMessage(err));
-        return throwError(() => err);
-      })
-    );
+    return this.http.delete<void>(`${this.apiUrl}/${id}`);
   }
 
   toggleTask(id: number): Observable<Task> {
-    this.errorSubject.next(null);
-    this.loadingSubject.next(true);
-
-    // Backend ignores request body for this endpoint; `{}` keeps Angular happy.
-    return this.http.patch<Task>(`${this.apiUrl}/${id}/toggle`, {}).pipe(
-      tap((task) => this.upsert(task)),
-      finalize(() => this.loadingSubject.next(false)),
-      catchError((err) => {
-        this.errorSubject.next(this.extractErrorMessage(err));
-        return throwError(() => err);
-      })
-    );
-  }
-
-  private upsert(task: Task): void {
-    const current = this.tasksSubject.value;
-    const exists = current.some((t) => t.id === task.id);
-    this.tasksSubject.next(
-      exists ? current.map((t) => (t.id === task.id ? task : t)) : [...current, task]
-    );
-  }
-
-  private extractErrorMessage(err: unknown): string {
-    const anyErr = err as any;
-    const message =
-      anyErr?.error?.message ??
-      anyErr?.message ??
-      'Request failed';
-    return typeof message === 'string' ? message : 'Request failed';
+    return this.http.patch<Task>(`${this.apiUrl}/${id}/toggle`, {});
   }
 }
