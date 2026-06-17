@@ -12,7 +12,7 @@ spec:
       labels:
         app: taskmanager-backend
       annotations:
-        deployment.kubernetes.io/revision: "2"
+        deployment.kubernetes.io/revision: "3"
     spec:
       containers:
         - name: backend

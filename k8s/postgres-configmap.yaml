@@ -6,5 +6,5 @@ data:
   db-host: taskmanager-db-service
   db-port: "5432"
   db-name: taskmanager
-  spring-ddl-auto: update
+  spring-ddl-auto: create
   spring-datasource-url: jdbc:postgresql://taskmanager-db-service:5432/taskmanager
