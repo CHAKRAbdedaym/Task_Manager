@@ -62,7 +62,8 @@
               "buildTarget": "taskmanager-ui:build:production"
             },
             "development": {
-              "buildTarget": "taskmanager-ui:build:development"
+              "buildTarget": "taskmanager-ui:build:development",
+              "proxyConfig": "proxy.conf.json"
             }
           },
           "defaultConfiguration": "development"
