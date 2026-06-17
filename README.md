@@ -104,6 +104,3 @@ The following environment variables are required for a secure setup:
 - `APP_JWT_SECRET`: A 256-bit (64-character hex) key for signing tokens.
 - `SPRING_DATASOURCE_URL`: PostgreSQL connection string.
 
-## 📄 License & Maintainers
-Generated and Optimized by **Antigravity AI**.
-Tagged: `v2.0.0-saas`
