@@ -11,14 +11,21 @@ spec:
     metadata:
       labels:
         app: taskmanager-backend
+      annotations:
+        deployment.kubernetes.io/revision: "2"
     spec:
       containers:
         - name: backend
           image: taskmanager-backend:latest
-          imagePullPolicy: Never
+          imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080
           env:
+            - name: APP_JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: taskmanager-secret
+                  key: jwt-secret
             - name: SPRING_DATASOURCE_URL
               valueFrom:
                 configMapKeyRef:

@@ -1,0 +1,24 @@
+# IDEs and Editors
+.idea/
+.vscode/
+*.swp
+*.swo
+.history/
+
+# OS Files
+.DS_Store
+Thumbs.db
+
+# Build & Dependencies
+Backend/target/
+Frontend/taskmanager-ui/node_modules/
+Frontend/taskmanager-ui/dist/
+Frontend/taskmanager-ui/.angular/
+
+# Docker & K8s
+.docker/
+*.log
+
+# Project specific
+tmp/
+.worktrees/

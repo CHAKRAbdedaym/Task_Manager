@@ -61,15 +61,29 @@ docker-compose up --build
 
 A production-ready setup with orchestration and ingress.
 
-1.  **Start Cluster** (e.g., Minikube):
+1.  **Start Cluster**:
     ```bash
     minikube start --addons=ingress
     ```
-2.  **Apply Manifests**:
+2.  **Sync Local Images** (Fixes "old version" issue):
+    ```bash
+    # Point terminal to minikube's Docker daemon
+    eval $(minikube docker-env)
+
+    # Build images inside minikube
+    docker build -t taskmanager-backend:latest ./Backend
+    docker build -t taskmanager-frontend:latest ./Frontend/taskmanager-ui
+    ```
+3.  **Apply Manifests**:
     ```bash
     kubectl apply -f k8s/
     ```
-3.  **Access**: Use the host defined in your Ingress (defaulting to `minikube ip`).
+4.  **Force Refresh** (if images were already built):
+    ```bash
+    kubectl rollout restart deployment taskmanager-backend
+    kubectl rollout restart deployment taskmanager-frontend
+    ```
+5.  **Access**: Use `minikube service taskmanager-frontend-service`.
 
 ---
 
