@@ -35,7 +35,7 @@ public class TaskController {
             @RequestParam(required = false) String search,
             @RequestParam(required = false) Instant dueBefore,
             @RequestParam(required = false) Instant dueAfter,
-            @PageableDefault(size = 10, sort = "createdAt,desc") Pageable pageable) {
+            @PageableDefault(size = 10, sort = "createdAt", direction = org.springframework.data.domain.Sort.Direction.DESC) Pageable pageable) {
         return taskService.getAllTasks(completed, priority, category, search, dueBefore, dueAfter, pageable);
     }
 
