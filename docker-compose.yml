@@ -16,6 +16,7 @@ services:
       - postgres_data:/var/lib/postgresql/data
     networks:
       - taskmanager-network
+
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U taskuser -d taskmanager"]
       interval: 10s
