@@ -39,3 +39,8 @@ spec:
                 configMapKeyRef:
                   name: taskmanager-config
                   key: spring-ddl-auto
+            - name: APP_JWTSECRET
+              valueFrom:
+                secretKeyRef:
+                  name: taskmanager-secret
+                  key: jwt-secret
