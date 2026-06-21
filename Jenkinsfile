@@ -27,18 +27,19 @@ pipeline {
             }
         }
 
-        stage('Test Backend') {
-            steps {
-                sh """
-                    docker run --rm \
-                        --network=host \
-                        -e SPRING_PROFILES_ACTIVE=test \
-                        ${BACKEND_IMAGE}:${IMAGE_TAG} \
-                        --spring.main.web-application-type=none \
-                        --spring.jpa.hibernate.ddl-auto=none || true
-                """
-            }
-        }
+       tage('Test Backend') {
+    steps {
+        sh """
+            docker build --target tester -t taskmanager-backend-test:${IMAGE_TAG} ./Backend
+            docker run --rm \
+                --network=host \
+                -e SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5432/taskmanager \
+                -e SPRING_DATASOURCE_USERNAME=taskuser \
+                -e SPRING_DATASOURCE_PASSWORD=taskpassword \
+                taskmanager-backend-test:${IMAGE_TAG}
+        """
+    }
+}
 
         stage('Load Images into Minikube') {
             steps {
