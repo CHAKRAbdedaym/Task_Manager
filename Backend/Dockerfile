@@ -18,8 +18,19 @@ COPY src ./src
 # Build the project, skip tests for now
 RUN mvn clean package -DskipTests
 
+
+
 # ──────────────────────────────────────────
-# STAGE 2: Run the app using a lightweight JRE
+# STAGE 2: Run tests (used only by CI, not part of final image)
+# ──────────────────────────────────────────
+FROM builder AS tester
+
+CMD ["mvn", "test"]
+
+
+
+# ──────────────────────────────────────────
+# STAGE 3: Run the app using a lightweight JRE
 # ──────────────────────────────────────────
 FROM eclipse-temurin:21-jre-alpine
 
