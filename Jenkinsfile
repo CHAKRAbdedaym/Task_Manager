@@ -27,7 +27,7 @@ pipeline {
             }
         }
 
-       tage('Test Backend') {
+       stage('Test Backend') {
     steps {
         sh """
             docker build --target tester -t taskmanager-backend-test:${IMAGE_TAG} ./Backend
