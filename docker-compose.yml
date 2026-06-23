@@ -8,6 +8,8 @@ services:
   taskmanager-db:
     image: postgres:16-alpine
     container_name: taskmanager-db
+    ports:
+      - "5432:5432"
     environment:
       POSTGRES_DB: taskmanager
       POSTGRES_USER: taskuser
@@ -18,7 +20,7 @@ services:
       - taskmanager-network
 
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U taskuser -d taskmanager"]
+      test: [ "CMD-SHELL", "pg_isready -U taskuser -d taskmanager" ]
       interval: 10s
       timeout: 5s
       retries: 10
@@ -32,7 +34,7 @@ services:
       context: ./Backend
       dockerfile: Dockerfile
     container_name: taskmanager-backend
-    image: taskmanager-backend       # ← add this line
+    image: taskmanager-backend # ← add this line
 
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://taskmanager-db:5432/taskmanager
@@ -56,7 +58,7 @@ services:
       context: ./Frontend/taskmanager-ui
       dockerfile: Dockerfile
     container_name: taskmanager-frontend
-    image: taskmanager-frontend       # ← add this line
+    image: taskmanager-frontend # ← add this line
 
     ports:
       - "80:80"
