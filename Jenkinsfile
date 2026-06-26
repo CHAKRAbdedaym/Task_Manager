@@ -27,19 +27,19 @@ pipeline {
             }
         }
 
-       stage('Test Backend') {
-    steps {
-        sh """
-            docker build --target tester -t taskmanager-backend-test:${IMAGE_TAG} ./Backend
-            docker run --rm \
-                --network=host \
-                -e SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5432/taskmanager \
-                -e SPRING_DATASOURCE_USERNAME=taskuser \
-                -e SPRING_DATASOURCE_PASSWORD=taskpassword \
-                taskmanager-backend-test:${IMAGE_TAG}
-        """
-    }
-}
+        stage('Test Backend') {
+            steps {
+                sh """
+                    docker build --target tester -t taskmanager-backend-test:${IMAGE_TAG} ./Backend
+                    docker run --rm \
+                        --network=host \
+                        -e SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5432/taskmanager \
+                        -e SPRING_DATASOURCE_USERNAME=taskuser \
+                        -e SPRING_DATASOURCE_PASSWORD=taskpassword \
+                        taskmanager-backend-test:${IMAGE_TAG}
+                """
+            }
+        }
 
         stage('Load Images into Minikube') {
             steps {
@@ -67,9 +67,17 @@ pipeline {
 
     post {
         success {
+            githubNotify context: 'continuous-integration/jenkins/branch',
+                         status: 'SUCCESS',
+                         description: 'Pipeline passed',
+                         credentialsId: 'github-multibranch'
             echo "✅ Pipeline completed successfully — build #${IMAGE_TAG} is live on Kubernetes"
         }
         failure {
+            githubNotify context: 'continuous-integration/jenkins/branch',
+                         status: 'FAILURE',
+                         description: 'Pipeline failed',
+                         credentialsId: 'github-multibranch'
             echo "❌ Pipeline failed — check the stage logs above"
         }
         always {
