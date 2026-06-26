@@ -67,17 +67,9 @@ pipeline {
 
     post {
         success {
-            githubNotify context: 'continuous-integration/jenkins/branch',
-                         status: 'SUCCESS',
-                         description: 'Pipeline passed',
-                         credentialsId: 'github-multibranch'
             echo "✅ Pipeline completed successfully — build #${IMAGE_TAG} is live on Kubernetes"
         }
         failure {
-            githubNotify context: 'continuous-integration/jenkins/branch',
-                         status: 'FAILURE',
-                         description: 'Pipeline failed',
-                         credentialsId: 'github-multibranch'
             echo "❌ Pipeline failed — check the stage logs above"
         }
         always {
